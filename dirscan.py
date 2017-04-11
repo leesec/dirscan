@@ -13,6 +13,7 @@ parse=optparse.OptionParser('[*]WEB DIR SCAN tools')
 parse.add_option('-u','--url',dest='url',help='[*]scan url http://www.xxx.com')
 parse.add_option('-t','--thread',dest='thread',help='[*]threading num default 10',default=10)
 parse.add_option('-s','--status_code',dest='code',help='[*]default status_code 200,eg:1 to 200,2 to 3xx,3 to 403,you can 1,2,output 200 and 3xx',default='1')
+parse.add_option('-f','--file_ext',dest='file_ext',help='[*] scan filetype',default='php')
 (opt,args)=parse.parse_args()
 
 
@@ -29,6 +30,8 @@ if t.scheme=='' or t.netloc=='':
     exit()
 
 ''' status code'''
+file_exts=['php','asp','aspx','jsp','jspx']
+dir_file='./dics/dirs.txt'
 
 status_codes=[]
 code=opt.code
@@ -54,8 +57,15 @@ queue = Queue.Queue()
 
 
 def scan_url_exists(url):
+    headers={
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:50.0) Gecko/20100101 Firefox/50.0',
+        'Accept-Language': 'en,zh-CN;q=0.8,zh;q=0.5,en-US;q=0.3',
+        'Accept-Encoding': 'gzip, deflate',
+        'Referer': 'http://www.google.com'}
+
     try:
-        req=requests.head(url.strip(),timeout=8)
+        req=requests.head(url.strip(),timeout=8,headers=headers)
         if req.status_code in status_codes:
             print url + ' code:' + str(req.status_code)
             open('exists_url.txt','a').write(url)
@@ -82,8 +92,11 @@ def open_pathfile(file):
 
 if __name__ == '__main__':
     url=opt.url
-    file_ext='php'
-    open_pathfile('dirs.txt')
+    if not opt.file_ext in file_exts:
+        print '[*]scan filetype mush asp,aspx,php,jsp,jspx'
+        exit()
+    file_ext=opt.file_ext
+    open_pathfile(dir_file)
     while queue.qsize() > 0:
         if activeCount() <= int(opt.thread):
             Thread(target=scan_url_exists,args=(queue.get(),)).start()
