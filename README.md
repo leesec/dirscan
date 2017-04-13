@@ -8,5 +8,5 @@ python dirscan.py -u http://www.xxx.com -t 20 -f jsp
 python dirscan.py -u http://www.xxx.com -t 20 -f asp
 ```
 
-
+字典文件  from 猪猪侠
 
